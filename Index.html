@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABHIJEET — Graphic Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Instrument+Serif:ital@0;1&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050404;--paper:#0e0a0a;--paper2:#160e0e;
+  --ink:#ece0d8;--ink2:#7a6860;
+  --red:#c8180c;--red-bright:#f02012;--red-dim:#7a0f08;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{background:var(--bg);color:var(--ink);font-family:'Space Mono',monospace;overflow-x:hidden;cursor:none}
+
+/* ── CURSOR ── */
+#cur{width:9px;height:9px;background:var(--red-bright);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);box-shadow:0 0 10px var(--red),0 0 24px rgba(200,24,12,.4);transition:transform .08s}
+#cur-ring{width:30px;height:30px;border:1px solid rgba(200,24,12,.45);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:left .1s,top .1s,width .18s,height .18s}
+body:has(a:hover) #cur-ring,body:has(button:hover) #cur-ring{width:50px;height:50px;border-color:var(--red)}
+
+/* ── BG CANVASES ── */
+#rainC,#batsC,#ltC{position:fixed;inset:0;pointer-events:none}
+#rainC{z-index:0;opacity:.3}
+#batsC{z-index:1;opacity:.75}
+#ltC{z-index:3}
+#bloom{position:fixed;inset:0;pointer-events:none;z-index:4;transition:background .04s}
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:2;background:radial-gradient(ellipse at center,transparent 30%,rgba(5,4,4,.92) 100%)}
+.amb{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 55% 40% at 75% 55%,rgba(192,24,12,.07) 0%,transparent 70%),radial-gradient(ellipse 35% 55% at 18% 28%,rgba(192,24,12,.04) 0%,transparent 70%)}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:72px;padding:0 52px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to bottom,rgba(5,4,4,.97),transparent);border-bottom:1px solid rgba(200,24,12,.07)}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:6px;color:var(--red-bright);text-decoration:none;text-shadow:0 0 18px rgba(200,24,12,.5);cursor:pointer}
+.nav-links{display:flex;gap:32px}
+.nav-links a{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--ink2);text-decoration:none;cursor:pointer;transition:color .2s;position:relative}
+.nav-links a::after{content:'';position:absolute;bottom:-3px;left:0;right:0;height:1px;background:var(--red);transform:scaleX(0);transition:transform .2s;transform-origin:left}
+.nav-links a:hover{color:var(--ink)}
+.nav-links a:hover::after{transform:scaleX(1)}
+.burger{display:none;flex-direction:column;gap:5px;cursor:pointer;z-index:1001}
+.burger span{width:22px;height:1px;background:var(--ink);display:block;transition:.3s}
+
+/* ── SECTION BASE ── */
+section{position:relative;z-index:10}
+.sec-label{font-size:8px;letter-spacing:6px;text-transform:uppercase;color:var(--red);text-shadow:0 0 10px rgba(200,24,12,.4);margin-bottom:14px;display:block}
+.sec-title{font-family:'Bebas Neue',sans-serif;line-height:.88;letter-spacing:.5px}
+
+/* ══════════════════
+   HERO
+══════════════════ */
+#hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:120px 60px 100px;overflow:hidden}
+.hero-eyebrow{font-size:9px;letter-spacing:7px;text-transform:uppercase;color:var(--red);margin-bottom:28px;opacity:0;animation:fadeUp .9s .3s forwards;text-shadow:0 0 12px rgba(200,24,12,.5)}
+.hero-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(80px,14vw,200px);line-height:.82;letter-spacing:-3px;opacity:0;animation:fadeUp .9s .5s forwards;position:relative;z-index:2}
+.hero-name .red{color:var(--red-bright);text-shadow:0 0 50px rgba(232,32,16,.5),0 0 100px rgba(192,24,12,.2)}
+.hero-name .ghost{-webkit-text-stroke:1px rgba(200,24,12,.4);color:transparent}
+.hero-sub{font-family:'Instrument Serif',serif;font-style:italic;font-size:clamp(15px,2vw,22px);color:var(--ink2);margin-top:28px;max-width:440px;line-height:1.65;opacity:0;animation:fadeUp .9s .7s forwards}
+.hero-cta{margin-top:48px;display:flex;gap:18px;opacity:0;animation:fadeUp .9s .9s forwards;flex-wrap:wrap}
+
+/* Bat signal */
+.bat-sig{position:absolute;right:-2%;top:50%;transform:translateY(-50%);width:580px;height:265px;pointer-events:none;z-index:1;opacity:0;animation:fadeUp 1.4s 1.1s forwards;filter:drop-shadow(0 0 18px rgba(192,24,12,.6)) drop-shadow(0 0 48px rgba(192,24,12,.25))}
+
+/* Stats strip */
+.hero-stats{position:absolute;right:60px;bottom:110px;display:flex;flex-direction:column;gap:24px;opacity:0;animation:fadeUp .9s 1.1s forwards;z-index:3;text-align:right}
+.snum{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--red-bright);line-height:1;text-shadow:0 0 20px rgba(232,32,16,.4)}
+.slbl{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--ink2)}
+
+/* Marquee */
+.mq-wrap{overflow:hidden;border-top:1px solid rgba(200,24,12,.12);background:rgba(5,4,4,.75);opacity:0;animation:fadeUp .9s 1.3s forwards}
+.mq-track{display:flex;animation:mq 22s linear infinite;width:max-content;padding:13px 0}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.mq-item{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:5px;color:var(--ink2);padding:0 32px;white-space:nowrap}
+.mq-dot{color:var(--red);text-shadow:0 0 8px var(--red)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── BUTTONS ── */
+.btn-p{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;padding:14px 34px;background:var(--red);color:var(--ink);border:none;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:10px;transition:transform .2s,box-shadow .2s,background .2s;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));box-shadow:0 0 18px rgba(192,24,12,.3)}
+.btn-p:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 var(--red-dim),0 0 28px rgba(232,32,16,.4);background:var(--red-bright)}
+.btn-o{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;padding:14px 34px;background:transparent;color:var(--ink2);border:1px solid rgba(200,24,12,.3);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:10px;transition:border-color .2s,color .2s,box-shadow .2s}
+.btn-o:hover{border-color:var(--red);color:var(--ink);box-shadow:inset 0 0 18px rgba(192,24,12,.08)}
+
+/* ══════════════════
+   ABOUT
+══════════════════ */
+#about{padding:120px 60px 100px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;border-top:1px solid rgba(200,24,12,.06)}
+
+.about-text{}
+.abt-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,8vw,110px);line-height:.86;letter-spacing:-1px}
+.abt-title span{color:var(--red-bright);text-shadow:0 0 28px rgba(232,32,16,.4)}
+.abt-role{font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--red);margin:18px 0 28px;text-shadow:0 0 10px rgba(200,24,12,.4)}
+.abt-bio{font-family:'Instrument Serif',serif;font-size:clamp(14px,1.6vw,18px);line-height:1.8;color:var(--ink2);max-width:480px}
+.abt-bio strong{color:var(--ink);font-weight:normal;font-style:italic}
+.abt-details{margin-top:44px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.det-row{border-top:1px solid rgba(200,24,12,.1);padding-top:12px}
+.det-key{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--ink2);margin-bottom:4px}
+.det-val{font-family:'Syne',sans-serif;font-size:12px;font-weight:700}
+
+/* Photo frame */
+.photo-wrap{position:relative;display:flex;align-items:center;justify-content:center}
+.photo-frame{width:360px;height:450px;position:relative;transition:transform .15s ease-out;cursor:none}
+.photo-inner{position:absolute;inset:0;clip-path:polygon(0 0,calc(100% - 28px) 0,100% 28px,100% 100%,28px 100%,0 calc(100% - 28px));overflow:hidden;background:var(--paper2);border:1px solid rgba(200,24,12,.15)}
+.photo-inner img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.photo-red-glow{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 105%,rgba(192,24,12,.22) 0%,transparent 65%);pointer-events:none}
+.photo-scan{position:absolute;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,rgba(192,24,12,.5),transparent);animation:scan 3.5s ease-in-out infinite;pointer-events:none}
+@keyframes scan{0%,100%{top:0;opacity:0}8%{opacity:1}92%{opacity:1}99%{top:100%;opacity:1}}
+.pcorner{position:absolute;width:18px;height:18px;border-color:var(--red);border-style:solid}
+.pcorner.tl{top:-3px;left:-3px;border-width:1px 0 0 1px}
+.pcorner.tr{top:-3px;right:-3px;border-width:1px 1px 0 0}
+.pcorner.bl{bottom:-3px;left:-3px;border-width:0 0 1px 1px}
+.pcorner.br{bottom:-3px;right:-3px;border-width:0 1px 1px 0}
+.photo-tag{position:absolute;bottom:-14px;left:20px;background:var(--red);color:var(--ink);font-size:7px;letter-spacing:3px;text-transform:uppercase;padding:6px 14px}
+
+/* Skills under photo */
+.skills-wrap{margin-top:56px;grid-column:1/-1;border-top:1px solid rgba(200,24,12,.07);padding-top:56px}
+.skills-grid{margin-top:36px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px 56px}
+.sk-row{}
+.sk-name{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--ink2);margin-bottom:7px;display:flex;justify-content:space-between}
+.sk-name span:last-child{color:var(--red)}
+.sk-bar{height:1px;background:rgba(200,24,12,.12);position:relative;overflow:hidden}
+.sk-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(to right,var(--red-dim),var(--red-bright));transform-origin:left;animation:barGrow 1.5s cubic-bezier(.16,1,.3,1) forwards;transform:scaleX(0);box-shadow:0 0 8px rgba(232,32,16,.5)}
+@keyframes barGrow{to{transform:scaleX(1)}}
+
+/* ══════════════════
+   PROJECTS
+══════════════════ */
+#projects{padding:100px 60px 80px;border-top:1px solid rgba(200,24,12,.06)}
+.proj-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:48px;flex-wrap:wrap;gap:20px}
+.tabs{display:flex;border:1px solid rgba(200,24,12,.15);flex-wrap:wrap}
+.tab{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:3px;text-transform:uppercase;padding:10px 16px;background:transparent;color:var(--ink2);border:none;cursor:pointer;transition:background .2s,color .2s;border-right:1px solid rgba(200,24,12,.15)}
+.tab:last-child{border-right:none}
+.tab.on{background:var(--red);color:var(--ink);box-shadow:0 0 14px rgba(192,24,12,.3)}
+.tab:not(.on):hover{background:rgba(200,24,12,.07);color:var(--ink)}
+
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:2px}
+.pcard{background:var(--paper);position:relative;overflow:hidden;cursor:pointer;aspect-ratio:4/3;border:1px solid rgba(200,24,12,.06);transition:box-shadow .4s}
+.pcard:hover{box-shadow:0 20px 60px rgba(0,0,0,.7),0 0 28px rgba(192,24,12,.12)}
+.pbg{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .5s}
+.pcard:hover .pbg{transform:scale(1.07)}
+.pover{position:absolute;inset:0;background:linear-gradient(to top,rgba(5,4,4,.97) 0%,rgba(5,4,4,.25) 55%,transparent 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:24px;transform:translateY(16%);transition:transform .4s cubic-bezier(.16,1,.3,1)}
+.pcard:hover .pover{transform:translateY(0)}
+.pcat{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:6px}
+.pname{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;line-height:1.2;margin-bottom:6px}
+.pdesc{font-size:10px;line-height:1.7;color:var(--ink2)}
+
+/* ══════════════════
+   PDF STRIP
+══════════════════ */
+#pdf-strip{padding:100px 60px;border-top:1px solid rgba(200,24,12,.06);display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}
+.pdf-left{}
+.pdf-mock{background:var(--paper2);border:1px solid rgba(200,24,12,.14);position:relative;aspect-ratio:3/4;overflow:hidden;cursor:pointer;transition:transform .4s,box-shadow .4s;clip-path:polygon(0 0,calc(100% - 28px) 0,100% 28px,100% 100%,0 100%);box-shadow:0 0 36px rgba(192,24,12,.08);max-width:320px}
+.pdf-mock:hover{transform:translateY(-8px) rotate(-1deg);box-shadow:0 28px 80px rgba(0,0,0,.7),0 0 40px rgba(192,24,12,.18)}
+.pdf-corner{position:absolute;top:0;right:0;width:28px;height:28px;background:var(--red);clip-path:polygon(0 0,100% 100%,100% 0)}
+.pdf-inner{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px}
+.pdf-title{font-family:'Bebas Neue',sans-serif;font-size:50px;letter-spacing:4px;text-align:center;line-height:.88}
+.pdf-sub{font-family:'Instrument Serif',serif;font-style:italic;font-size:13px;color:var(--ink2);text-align:center}
+.pdf-div{width:48px;height:1px;background:var(--red);box-shadow:0 0 8px var(--red)}
+.pdf-glow{position:absolute;bottom:0;left:0;right:0;height:35%;background:linear-gradient(to top,rgba(192,24,12,.07),transparent);pointer-events:none}
+.pdf-lines{position:absolute;bottom:32px;left:32px;right:32px;display:flex;flex-direction:column;gap:5px}
+.pdf-line{height:1px;background:rgba(200,24,12,.1)}
+.pdf-line:last-child{width:50%}
+
+.pdf-right{}
+.pdf-right-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(42px,5vw,68px);line-height:.88;letter-spacing:1px;margin-bottom:20px}
+.pdf-right-title span{color:var(--red-bright);text-shadow:0 0 20px rgba(232,32,16,.3)}
+.pdf-desc{font-family:'Instrument Serif',serif;font-style:italic;font-size:17px;line-height:1.75;color:var(--ink2);margin-bottom:40px}
+.pdf-list{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:40px}
+.pdf-list li{font-size:11px;color:var(--ink2);display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(200,24,12,.07);padding-bottom:9px}
+.pdf-list li span{color:var(--red);font-family:'Bebas Neue',sans-serif;font-size:14px}
+.dl-btn{display:flex;align-items:center;justify-content:center;gap:14px;padding:18px 40px;background:var(--red);color:var(--ink);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;border:none;width:100%;transition:transform .2s,box-shadow .2s,background .2s;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px));box-shadow:0 0 22px rgba(192,24,12,.3)}
+.dl-btn:hover{transform:translate(-3px,-3px);box-shadow:5px 5px 0 var(--red-dim),0 0 36px rgba(232,32,16,.3);background:var(--red-bright)}
+.dl-note{font-size:8px;color:var(--ink2);text-align:center;margin-top:10px;letter-spacing:2px}
+
+/* ══════════════════
+   CONTACT
+══════════════════ */
+#contact{padding:100px 60px 60px;border-top:1px solid rgba(200,24,12,.06)}
+.contact-wrap{display:grid;grid-template-columns:1fr 1fr;gap:72px;margin-top:56px}
+.ctag{font-family:'Instrument Serif',serif;font-style:italic;font-size:18px;color:var(--ink2);margin-top:20px;line-height:1.65;max-width:380px}
+.clinks{margin-top:40px;display:flex;flex-direction:column;gap:2px}
+.clink{display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--paper);border:1px solid rgba(200,24,12,.07);text-decoration:none;color:var(--ink);transition:border-color .2s,transform .2s,background .2s;cursor:pointer}
+.clink:hover{border-color:var(--red);background:rgba(192,24,12,.05);transform:translateX(6px)}
+.cplat{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--ink2);width:88px}
+.cval{font-family:'Syne',sans-serif;font-size:13px;font-weight:700}
+.carr{margin-left:auto;opacity:0;transition:opacity .2s;font-size:15px;color:var(--red)}
+.clink:hover .carr{opacity:1}
+.cicon{font-size:16px;width:26px;text-align:center;color:var(--red)}
+
+/* Form */
+.fgroup{margin-bottom:18px}
+.flabel{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--red);display:block;margin-bottom:6px}
+.finput,.ftextarea{width:100%;background:var(--paper);border:1px solid rgba(200,24,12,.1);color:var(--ink);font-family:'Space Mono',monospace;font-size:11px;padding:13px 16px;outline:none;transition:border-color .2s,box-shadow .2s;resize:none}
+.finput:focus,.ftextarea:focus{border-color:var(--red);box-shadow:0 0 10px rgba(192,24,12,.15)}
+.ftextarea{height:100px}
+.sbtn{width:100%;padding:16px;background:transparent;border:1px solid var(--red);color:var(--red);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:4px;text-transform:uppercase;cursor:pointer;transition:background .2s,color .2s,box-shadow .2s;margin-top:8px}
+.sbtn:hover{background:var(--red);color:var(--ink);box-shadow:0 0 18px rgba(192,24,12,.3)}
+
+/* ── FOOTER ── */
+footer{padding:40px 60px;border-top:1px solid rgba(200,24,12,.07);display:flex;justify-content:space-between;align-items:center;margin-top:80px}
+.flogo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:5px;color:var(--red-bright);text-shadow:0 0 14px rgba(232,32,16,.4)}
+.fcopy{font-size:8px;color:var(--ink2);letter-spacing:2px}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:32px;right:32px;background:var(--red);color:var(--ink);padding:13px 22px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;transform:translateY(70px);opacity:0;transition:all .4s cubic-bezier(.16,1,.3,1);z-index:9000;border-left:2px solid var(--red-bright);box-shadow:0 0 18px rgba(192,24,12,.4)}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ── RESPONSIVE ── */
+@media(max-width:860px){
+  nav{padding:0 24px}
+  .nav-links{display:none;position:fixed;inset:0;background:rgba(5,4,4,.98);flex-direction:column;justify-content:center;align-items:center;gap:36px;z-index:999}
+  .nav-links.open{display:flex}
+  .nav-links a{font-size:13px}
+  .burger{display:flex}
+  #hero{padding:100px 24px 80px}
+  .bat-sig{width:280px;height:130px;right:-4px;top:35%;opacity:.2}
+  .hero-stats{display:none}
+  #about{grid-template-columns:1fr;padding:80px 24px;gap:48px}
+  .photo-frame{width:260px;height:320px}
+  .skills-wrap{grid-column:1}
+  #projects{padding:80px 24px 60px}
+  .proj-grid{grid-template-columns:1fr 1fr}
+  #pdf-strip{grid-template-columns:1fr;padding:80px 24px;gap:48px}
+  .pdf-mock{max-width:240px}
+  #contact{padding:80px 24px 60px}
+  .contact-wrap{grid-template-columns:1fr;gap:48px}
+  footer{flex-direction:column;gap:12px;text-align:center;padding:28px 24px}
+}
+@media(max-width:500px){
+  .proj-grid{grid-template-columns:1fr}
+  .hero-cta{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<canvas id="rainC"></canvas>
+<canvas id="batsC"></canvas>
+<canvas id="ltC"></canvas>
+<div id="bloom"></div>
+<div class="vignette"></div>
+<div class="amb"></div>
+
+<div id="cur"></div>
+<div id="cur-ring"></div>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-logo" onclick="goTo('#hero')">ABJ.</span>
+  <div class="nav-links" id="navLinks">
+    <a onclick="goTo('#hero');closeNav()">Home</a>
+    <a onclick="goTo('#about');closeNav()">About</a>
+    <a onclick="goTo('#projects');closeNav()">Projects</a>
+    <a onclick="goTo('#pdf-strip');closeNav()">Portfolio</a>
+    <a onclick="goTo('#contact');closeNav()">Contact</a>
+  </div>
+  <div class="burger" id="burger" onclick="toggleNav()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section id="hero">
+  <!-- Bat signal SVG -->
+  <div class="bat-sig">
+    <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 1280.000000 585.000000"
+      preserveAspectRatio="xMidYMid meet"
+      style="width:100%;height:100%">
+      <g transform="translate(0.000000,585.000000) scale(0.100000,-0.100000)"
+        fill="rgba(192,24,12,0.55)" stroke="none">
+        <path d="M9785 5728 c-2 -7 -22 -68 -45 -135 -313 -948 -940 -1649 -1822
+        -2037 -209 -92 -598 -211 -618 -189 -4 4 -47 209 -96 456 -49 246 -92 446 -96
+        445 -4 -2 -93 -85 -197 -186 l-190 -182 -48 30 c-86 55 -167 73 -301 67 -75
+        -3 -135 -11 -166 -22 l-49 -18 -177 184 -177 184 -26 -85 c-14 -47 -83 -276
+        -152 -510 -69 -234 -131 -440 -136 -458 -13 -40 -11 -40 -214 25 -834 270
+        -1466 781 -1894 1533 -119 210 -278 599 -306 753 -4 20 -11 37 -15 37 -4 0
+        -25 -21 -46 -47 -59 -73 -199 -219 -294 -307 -463 -431 -1050 -712 -1700 -815
+        -151 -24 -345 -41 -483 -42 l-102 0 110 -23 c694 -145 1141 -501 1270 -1010
+        13 -50 26 -126 30 -169 6 -63 10 -77 22 -73 37 15 183 48 290 67 149 26 427
+        36 544 20 414 -59 707 -271 890 -646 67 -137 110 -263 139 -403 22 -112 40
+        -248 40 -308 l0 -42 92 55 c106 64 190 101 314 140 83 25 102 27 264 27 161 0
+        182 -2 265 -27 119 -36 288 -120 400 -199 111 -78 344 -308 454 -446 97 -123
+        245 -344 336 -502 77 -133 237 -457 286 -579 l34 -84 13 49 c126 473 374 815
+        792 1093 392 262 930 443 1499 506 80 8 145 17 146 18 1 1 12 56 24 122 138
+        724 488 1210 991 1374 267 88 596 92 886 11 64 -17 64 -17 68 4 30 154 92 301
+        178 423 160 227 434 471 793 705 200 131 357 220 635 361 140 71 247 127 238
+        123 -10 -3 -71 -13 -135 -23 -183 -27 -599 -24 -793 6 -383 58 -703 159 -1057
+        331 -252 122 -474 255 -646 387 -39 30 -59 40 -62 31z"/>
+      </g>
+    </svg>
+  </div>
+
+  <p class="hero-eyebrow">✦ Graphic Designer &amp; Visual Storyteller — Akola, India</p>
+  <h1 class="hero-name">
+    <span class="ghost">THE</span><br>
+    <span class="red">DESIGN</span><br>
+    SPEAKS.
+  </h1>
+  <p class="hero-sub">Logos. Posters. Print. Social. Packaging.<br>Every pixel with intention.</p>
+  <div class="hero-cta">
+    <a class="btn-p" onclick="goTo('#projects')">↗ View Projects</a>
+    <a class="btn-o" onclick="goTo('#contact')">Let's Talk →</a>
+    <a class="btn-o" onclick="dlPDF()">↓ Download Portfolio</a>
+  </div>
+
+  <div class="hero-stats">
+    <div><div class="snum">50+</div><div class="slbl">Projects Done</div></div>
+    <div><div class="snum">4+</div><div class="slbl">Years Active</div></div>
+    <div><div class="snum">∞</div><div class="slbl">Ideas Brewing</div></div>
+  </div>
+</section>
+
+<!-- Marquee -->
+<div class="mq-wrap">
+  <div class="mq-track">
+    <span class="mq-item">LOGO DESIGN</span><span class="mq-item mq-dot">◆</span>
+    <span class="mq-item">PRINT MEDIA</span><span class="mq-item mq-dot">◆</span>
+    <span class="mq-item">POSTER DESIGN</span><span class="mq-item mq-dot">◆</span>
+    <span class="mq-item">SOCIAL MEDIA</span><span class="mq-item mq-dot">◆</span>
+    <span class="mq-item">PACKAGING</span><span class="mq-item mq-dot">◆</span>
+    <span class="mq-item">BRAND IDENTITY</span><span class="mq-item mq-dot">◆</span>
+    <span class="mq-item">VIDEO EDITING</span><span class="mq-item mq-dot">◆</span>
+    <span class="mq-item">LOGO DESIGN</span><span class="mq-item mq-dot">◆</span>
+    <span class="mq-item">PRINT MEDIA</span><span class="mq-item mq-dot">◆</span>
+    <span class="mq-item">POSTER DESIGN</span><span class="mq-item mq-dot">◆</span>
+    <span class="mq-item">SOCIAL MEDIA</span><span class="mq-item mq-dot">◆</span>
+    <span class="mq-item">PACKAGING</span><span class="mq-item mq-dot">◆</span>
+    <span class="mq-item">BRAND IDENTITY</span><span class="mq-item mq-dot">◆</span>
+    <span class="mq-item">VIDEO EDITING</span><span class="mq-item mq-dot">◆</span>
+  </div>
+</div>
+
+<!-- ═══ ABOUT ═══ -->
+<section id="about">
+  <div class="about-text">
+    <span class="sec-label">✦ The Person Behind The Pixels</span>
+    <h2 class="abt-title sec-title">ABHI<br><span>JEET</span></h2>
+    <p class="abt-role">Graphic Designer · Social Media Manager · Visual Thinker</p>
+    <p class="abt-bio">
+      Graphic Designer based in Akola, Maharashtra. Dropped engineering, picked up design — no regrets.
+      <br><br>
+      I work on logos, print, social media creatives, posters, and packaging. Currently full-time at <strong>Namaste Business Advisory</strong>, taking freelance on the side.
+      <br><br>
+      Big on cinema, photography, and getting the details right.
+    </p>
+    <div class="abt-details">
+      <div class="det-row"><div class="det-key">Based In</div><div class="det-val">Akola, Maharashtra</div></div>
+      <div class="det-row"><div class="det-key">Current Role</div><div class="det-val">Graphic Designer</div></div>
+      <div class="det-row"><div class="det-key">Experience</div><div class="det-val">5+ Years</div></div>
+      <div class="det-row"><div class="det-key">Status</div><div class="det-val" style="color:var(--red-bright)">● Open to Freelance</div></div>
+      <div class="det-row"><div class="det-key">Tools</div><div class="det-val">Ae · Ps · Ai · Pr</div></div>
+      <div class="det-row"><div class="det-key">Languages</div><div class="det-val">Hindi · Marathi · English</div></div>
+    </div>
+  </div>
+
+  <div class="photo-wrap">
+    <div class="photo-frame" id="photoFrame">
+      <div class="photo-inner">
+        <img src="Abhijeet.PNG" alt="Abhijeet">
+        <div class="photo-red-glow"></div>
+        <div class="photo-scan"></div>
+      </div>
+      <div class="pcorner tl"></div>
+      <div class="pcorner tr"></div>
+      <div class="pcorner bl"></div>
+      <div class="pcorner br"></div>
+      <div class="photo-tag">Available for work ◆</div>
+    </div>
+  </div>
+
+  <!-- Skills -->
+  <div class="skills-wrap">
+    <span class="sec-label">✦ Skill Set</span>
+    <div class="skills-grid">
+      <div class="sk-row"><div class="sk-name"><span>Logo & Brand Identity</span><span>90%</span></div><div class="sk-bar"><div class="sk-fill" style="width:90%;animation-delay:.1s"></div></div></div>
+      <div class="sk-row"><div class="sk-name"><span>Social Media Design</span><span>95%</span></div><div class="sk-bar"><div class="sk-fill" style="width:95%;animation-delay:.2s"></div></div></div>
+      <div class="sk-row"><div class="sk-name"><span>Print & Layout Design</span><span>80%</span></div><div class="sk-bar"><div class="sk-fill" style="width:80%;animation-delay:.3s"></div></div></div>
+      <div class="sk-row"><div class="sk-name"><span>Poster Design</span><span>88%</span></div><div class="sk-bar"><div class="sk-fill" style="width:88%;animation-delay:.4s"></div></div></div>
+      <div class="sk-row"><div class="sk-name"><span>Packaging Design</span><span>75%</span></div><div class="sk-bar"><div class="sk-fill" style="width:75%;animation-delay:.5s"></div></div></div>
+      <div class="sk-row"><div class="sk-name"><span>Video Editing</span><span>85%</span></div><div class="sk-bar"><div class="sk-fill" style="width:85%;animation-delay:.6s"></div></div></div>
+      <div class="sk-row"><div class="sk-name"><span>Figma & UI</span><span>15%</span></div><div class="sk-bar"><div class="sk-fill" style="width:15%;animation-delay:.7s"></div></div></div>
+      <div class="sk-row"><div class="sk-name"><span>Typography</span><span>82%</span></div><div class="sk-bar"><div class="sk-fill" style="width:82%;animation-delay:.8s"></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PROJECTS ═══ -->
+<section id="projects">
+  <div class="proj-header">
+    <div>
+      <span class="sec-label">✦ Work</span>
+      <h2 class="sec-title" style="font-size:clamp(48px,7vw,96px)">SELECTED<br>PROJECTS</h2>
+    </div>
+    <div class="tabs">
+      <button class="tab on" onclick="fTab('all')" data-t="all">All</button>
+      <button class="tab" onclick="fTab('logo')" data-t="logo">Logofolio</button>
+      <button class="tab" onclick="fTab('print')" data-t="print">Print</button>
+      <button class="tab" onclick="fTab('poster')" data-t="poster">Poster</button>
+      <button class="tab" onclick="fTab('social')" data-t="social">Social</button>
+      <button class="tab" onclick="fTab('packaging')" data-t="packaging">Packaging</button>
+    </div>
+  </div>
+
+  <div class="proj-grid" id="pg">
+    <!-- LOGOS -->
+    <div class="pcard" data-c="logo">
+      <div class="pbg" style="background-image:url('logo-1.jpg')"></div>
+      <div class="pover"><p class="pcat">Logofolio</p><h3 class="pname">Krishna Supermart</h3><p class="pdesc">Brand identity for a local retail supermart — built to feel trustworthy, recognizable, and rooted in the community it serves.</p></div>
+    </div>
+    <div class="pcard" data-c="logo">
+      <div class="pbg" style="background-image:url('logo-2.jpg')"></div>
+      <div class="pover"><p class="pcat">Logofolio</p><h3 class="pname">Archana Masale</h3><p class="pdesc">Identity design for a homegrown spice brand from Maharashtra. The mark needed to feel traditional yet shelf-ready — warm, bold, and unmistakably Indian.</p></div>
+    </div>
+    <div class="pcard" data-c="logo">
+      <div class="pbg" style="background-image:url('logo-3.jpg')"></div>
+      <div class="pover"><p class="pcat">Logofolio</p><h3 class="pname">Wisdom Tooth</h3><p class="pdesc">Logo for a YouTube channel — designed to be instantly readable at thumbnail size while carrying a personality that stands out in a crowded feed.</p></div>
+    </div>
+    <!-- PRINT -->
+    <div class="pcard" data-c="print">
+      <div class="pbg" style="background-image:url('Print-1.jpg')"></div>
+      <div class="pover"><p class="pcat">Print Media</p><h3 class="pname">Grand Opening Leaflet</h3><p class="pdesc">Promotional leaflet for a store's grand opening — designed to grab attention fast, communicate offers clearly, and drive footfall on day one.</p></div>
+    </div>
+    <div class="pcard" data-c="print">
+      <div class="pbg" style="background-image:url('print-2.jpg')"></div>
+      <div class="pover"><p class="pcat">Print Media</p><h3 class="pname">NBA Company Brochure</h3><p class="pdesc">Corporate brochure for Namaste Business Advisory — structured layout, strong typographic hierarchy, built to leave a professional impression with every retail client.</p></div>
+    </div>
+    <!-- POSTERS -->
+    <div class="pcard" data-c="poster">
+      <div class="pbg" style="background-image:url('Poster-1.jpg')"></div>
+      <div class="pover"><p class="pcat">Poster Design</p><h3 class="pname">Oppenheimer</h3><p class="pdesc">Fan redesign of the Oppenheimer poster — stripped back to pure contrast and weight. Black, white, and the kind of tension that doesn't need colour to land.</p></div>
+    </div>
+    <div class="pcard" data-c="poster">
+      <div class="pbg" style="background-image:url('Poster-2.jpg')"></div>
+      <div class="pover"><p class="pcat">Poster Design</p><h3 class="pname">Robert Pattinson</h3><p class="pdesc">Chaotic editorial treatment — torn newspaper elements, raw texture, and aggressive layout. Designed to feel like it was pulled from a crime scene, not a design studio.</p></div>
+    </div>
+    <div class="pcard" data-c="poster">
+      <div class="pbg" style="background-image:url('Poster-3.jpg')"></div>
+      <div class="pover"><p class="pcat">Poster Design</p><h3 class="pname">Toji Fushiguro</h3><p class="pdesc">High-contrast character poster with heavy grain and a gritty monochrome palette — the kind of visual that hits before you even read the name.</p></div>
+    </div>
+    <div class="pcard" data-c="poster">
+      <div class="pbg" style="background-image:url('Poster-4.jpg')"></div>
+      <div class="pover"><p class="pcat">Poster Design</p><h3 class="pname">Gojo Satoru</h3><p class="pdesc">Striking typographic poster built around dominance and presence — bold hierarchy, textured treatment, and a composition that commands the wall it's on.</p></div>
+    </div>
+    <div class="pcard" data-c="poster">
+      <div class="pbg" style="background-image:url('Poster-5.jpg')"></div>
+      <div class="pover"><p class="pcat">Poster Design</p><h3 class="pname">Kento Nanami</h3><p class="pdesc">Restrained and deliberate — a poster designed around stillness. Clean layout, controlled grain, and a quiet intensity that reflects the character perfectly.</p></div>
+    </div>
+    <div class="pcard" data-c="poster">
+      <div class="pbg" style="background-image:url('Poster-6.jpg')"></div>
+      <div class="pover"><p class="pcat">Poster Design</p><h3 class="pname">Alia Bhatt</h3><p class="pdesc">Editorial portrait poster — high contrast, film-like texture, and typographic framing that turns a photograph into a statement piece.</p></div>
+    </div>
+    <div class="pcard" data-c="poster">
+      <div class="pbg" style="background-image:url('Poster-7.jpg')"></div>
+      <div class="pover"><p class="pcat">Poster Design</p><h3 class="pname">Anirudh Ravichander</h3><p class="pdesc">Tribute poster for the composer — rhythm translated into layout. The design breathes the same energy his music carries, with texture doing the heavy lifting.</p></div>
+    </div>
+    <div class="pcard" data-c="poster">
+      <div class="pbg" style="background-image:url('Poster-8.jpg')"></div>
+      <div class="pover"><p class="pcat">Poster Design</p><h3 class="pname">American Psycho</h3><p class="pdesc">Experimental poster built entirely around texture — layered, distressed, and deeply unsettling in exactly the right way. The surface tells the story before the type does.</p></div>
+    </div>
+    <!-- SOCIAL -->
+    <div class="pcard" data-c="social">
+      <div class="pbg" style="background-image:url('Social-1.jpg')"></div>
+      <div class="pover"><p class="pcat">Social Media</p><h3 class="pname">Weekly Offers Campaign</h3><p class="pdesc">Recurring social creatives for a retail superstore — designed to be instantly scannable, drive urgency, and stay visually consistent week after week.</p></div>
+    </div>
+    <div class="pcard" data-c="social">
+      <div class="pbg" style="background-image:url('Social-2.jpg')"></div>
+      <div class="pover"><p class="pcat">Social Media</p><h3 class="pname">Instagram Carousel Series</h3><p class="pdesc">Multi-slide carousel built for engagement — each panel flows into the next, structured to keep people swiping and end on a clear call to action.</p></div>
+    </div>
+    <!-- PACKAGING -->
+    <div class="pcard" data-c="packaging">
+      <div class="pbg" style="background-image:url('Packaging-1.jpg')"></div>
+      <div class="pover"><p class="pcat">Packaging Design</p><h3 class="pname">Krips Rusk</h3><p class="pdesc">Product label design for a local snack brand — bold enough to stand out on the shelf, clean enough to communicate quality at a glance.</p></div>
+    </div>
+    <div class="pcard" data-c="packaging">
+      <div class="pbg" style="background-image:url('Packaging-2.jpg')"></div>
+      <div class="pover"><p class="pcat">Packaging Design</p><h3 class="pname">Rajgeera Laddoo</h3><p class="pdesc">Packaging label for a traditional Indian sweet — the design needed warmth, authenticity, and enough visual appeal to make a handmade product feel premium.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PDF STRIP ═══ -->
+<section id="pdf-strip">
+  <div class="pdf-left">
+    <div class="pdf-mock" onclick="window.open('Abhijeet-Portfolio.pdf','_blank')">
+      <div class="pdf-corner"></div>
+      <div class="pdf-inner">
+        <p style="font-size:7px;letter-spacing:4px;text-transform:uppercase;color:var(--red)">Portfolio 2026</p>
+        <div class="pdf-div"></div>
+        <div class="pdf-title">ABHI<br>JEET</div>
+        <div class="pdf-sub">Graphic Designer<br>Visual Storyteller</div>
+        <div class="pdf-div"></div>
+        <p style="font-size:7px;letter-spacing:2px;color:var(--ink2);text-transform:uppercase">Akola · Maharashtra · India</p>
+      </div>
+      <div class="pdf-lines"><div class="pdf-line"></div><div class="pdf-line"></div><div class="pdf-line"></div></div>
+      <div class="pdf-glow"></div>
+    </div>
+  </div>
+  <div class="pdf-right">
+    <span class="sec-label">✦ Portfolio Document</span>
+    <div class="pdf-right-title">MY WORK,<br><span>IN FULL</span><br>DETAIL.</div>
+    <p class="pdf-desc">The website gives you the highlights. The PDF gives you the full picture — every project, every process, every detail.</p>
+    <ul class="pdf-list">
+      <li><span>01</span> About Me & Design Philosophy</li>
+      <li><span>02</span> Logofolio — Identity Projects</li>
+      <li><span>03</span> Print Media — Leaflets, Brochures</li>
+      <li><span>04</span> Poster Design Collection</li>
+      <li><span>05</span> Social Media Campaign Work</li>
+      <li><span>06</span> Packaging Design Projects</li>
+    </ul>
+    <button class="dl-btn" onclick="dlPDF()">↓ &nbsp;Download Portfolio PDF</button>
+    <p class="dl-note">PDF · ~10MB · Updated April 2026</p>
+  </div>
+</section>
+
+<!-- ═══ CONTACT ═══ -->
+<section id="contact">
+  <span class="sec-label">✦ Get In Touch</span>
+  <h2 class="sec-title" style="font-size:clamp(52px,8vw,110px)">LET'S<br><span style="color:var(--red-bright);text-shadow:0 0 22px rgba(232,32,16,.3)">MAKE</span><br>SOMETHING.</h2>
+  <div class="contact-wrap">
+    <div>
+      <p class="ctag">Whether you have a project, a question, or just want to vibe about design — I'm here.</p>
+      <div class="clinks">
+        <a class="clink" href="mailto:dzns.abhi@gmail.com"><span class="cicon">@</span><span class="cplat">Email</span><span class="cval">dzns.abhi@gmail.com</span><span class="carr">↗</span></a>
+        <a class="clink" href="tel:+919226462886"><span class="cicon">☎</span><span class="cplat">Call</span><span class="cval">+91 92264 62886</span><span class="carr">↗</span></a>
+        <a class="clink" href="https://www.instagram.com/abhijeetfrr" target="_blank"><span class="cicon">◈</span><span class="cplat">Instagram</span><span class="cval">@abhijeetfrr</span><span class="carr">↗</span></a>
+        <a class="clink" href="https://www.behance.net/iabhijeet" target="_blank"><span class="cicon">⬡</span><span class="cplat">Behance</span><span class="cval">behance.net/iabhijeet</span><span class="carr">↗</span></a>
+        <a class="clink" href="https://www.linkedin.com/in/abhijeetiwari/" target="_blank"><span class="cicon">▣</span><span class="cplat">LinkedIn</span><span class="cval">linkedin.com/in/abhijeetiwari</span><span class="carr">↗</span></a>
+        <a class="clink" href="https://dribbble.com/Abhijeet-dzns" target="_blank"><span class="cicon">◎</span><span class="cplat">Dribbble</span><span class="cval">dribbble.com/Abhijeet-dzns</span><span class="carr">↗</span></a>
+      </div>
+    </div>
+    <div>
+      <span class="sec-label" style="margin-bottom:20px;display:block">✦ Send A Message</span>
+      <div class="fgroup"><label class="flabel">Your Name</label><input type="text" class="finput" placeholder="John Doe" id="fN"></div>
+      <div class="fgroup"><label class="flabel">Email Address</label><input type="email" class="finput" placeholder="you@email.com" id="fE"></div>
+      <div class="fgroup"><label class="flabel">Project Type</label><input type="text" class="finput" placeholder="Logo Design, Social Media..." id="fT"></div>
+      <div class="fgroup"><label class="flabel">Message</label><textarea class="ftextarea" placeholder="Tell me about your project..." id="fM"></textarea></div>
+      <button class="sbtn" onclick="sendMsg()">Send Message ↗</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="flogo">ABJ.</div>
+  <p class="fcopy">© 2026 Abhijeet — All Rights Reserved</p>
+  <p class="fcopy">Akola, MH ✦ Open to Freelance</p>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── CURSOR ── */
+const cur=document.getElementById('cur'),ring=document.getElementById('cur-ring');
+document.addEventListener('mousemove',e=>{
+  cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';
+  setTimeout(()=>{ring.style.left=e.clientX+'px';ring.style.top=e.clientY+'px'},85);
+});
+
+/* ── SMOOTH SCROLL ── */
+function goTo(sel){
+  const el=document.querySelector(sel);
+  if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ── MOBILE NAV ── */
+let navOpen=false;
+function toggleNav(){navOpen=!navOpen;document.getElementById('navLinks').classList.toggle('open',navOpen)}
+function closeNav(){document.getElementById('navLinks').classList.remove('open');navOpen=false}
+
+/* ── RAIN ── */
+(function(){
+  const c=document.getElementById('rainC'),ctx=c.getContext('2d');
+  let d=[];
+  function resize(){
+    c.width=innerWidth;c.height=innerHeight;d=[];
+    for(let i=0;i<Math.floor(c.width/5.5);i++)
+      d.push({x:Math.random()*c.width,y:Math.random()*c.height,
+        len:Math.random()*55+15,sp:Math.random()*5+2.5,
+        op:Math.random()*.22+.04,w:Math.random()*.4+.2});
+  }
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    d.forEach(r=>{
+      ctx.strokeStyle=`rgba(150,85,75,${r.op})`;ctx.lineWidth=r.w;
+      ctx.beginPath();ctx.moveTo(r.x,r.y);ctx.lineTo(r.x-r.len*.12,r.y+r.len);ctx.stroke();
+      r.y+=r.sp;if(r.y>c.height+80){r.y=-80;r.x=Math.random()*c.width}
+    });
+    requestAnimationFrame(draw);
+  }
+  resize();addEventListener('resize',resize);draw();
+})();
+
+/* ── BATS ── */
+(function(){
+  const c=document.getElementById('batsC'),ctx=c.getContext('2d');
+  c.width=innerWidth;c.height=innerHeight;
+  addEventListener('resize',()=>{c.width=innerWidth;c.height=innerHeight});
+  function bat(cx,cy,sz,fl){
+    ctx.save();ctx.translate(cx,cy);
+    const w=sz,h=sz*.5,f=Math.sin(fl)*h*.55;
+    ctx.beginPath();ctx.ellipse(0,0,w*.1,h*.26,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.moveTo(0,-h*.04);
+    ctx.bezierCurveTo(-w*.22,-h*.08+f,-w*.48,-h*.32+f,-w*.78,-h*.08+f);
+    ctx.bezierCurveTo(-w*.52,h*.12,-w*.28,h*.16,0,h*.08);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(0,-h*.04);
+    ctx.bezierCurveTo(w*.22,-h*.08+f,w*.48,-h*.32+f,w*.78,-h*.08+f);
+    ctx.bezierCurveTo(w*.52,h*.12,w*.28,h*.16,0,h*.08);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(-w*.06,-h*.2);ctx.lineTo(-w*.11,-h*.48);ctx.lineTo(0,-h*.2);ctx.fill();
+    ctx.beginPath();ctx.moveTo(w*.06,-h*.2);ctx.lineTo(w*.11,-h*.48);ctx.lineTo(0,-h*.2);ctx.fill();
+    ctx.restore();
+  }
+  const bats=[];
+  for(let i=0;i<24;i++){
+    const dp=Math.random(),sz=12+dp*30;
+    bats.push({x:Math.random()*c.width,y:Math.random()*c.height*.72+20,sz,
+      sx:(Math.random()*.7+.25)*(Math.random()>.5?1:-1)*(.35+dp*.8),
+      sy:(Math.random()-.5)*.35*(.3+dp*.5),
+      fs:.07+Math.random()*.07+dp*.04,fa:Math.random()*Math.PI*2,
+      op:.15+dp*.38,wf:Math.random()*.013+.007,wo:Math.random()*Math.PI*2,t:0});
+  }
+  function animB(){
+    ctx.clearRect(0,0,c.width,c.height);
+    bats.forEach(b=>{
+      b.t++;b.fa+=b.fs;b.x+=b.sx;b.y+=b.sy+Math.sin(b.t*b.wf+b.wo)*.3;
+      if(b.x>c.width+b.sz*2)b.x=-b.sz*2;
+      if(b.x<-b.sz*2)b.x=c.width+b.sz*2;
+      if(b.y>c.height*.78)b.y=15;
+      if(b.y<-15)b.y=c.height*.7;
+      ctx.fillStyle=`rgba(14,5,5,${b.op})`;
+      bat(b.x,b.y,b.sz,b.fa);
+    });
+    requestAnimationFrame(animB);
+  }
+  animB();
+})();
+
+/* ── LIGHTNING ── */
+(function(){
+  const c=document.getElementById('ltC'),ctx=c.getContext('2d');
+  const bl=document.getElementById('bloom');
+  function resize(){c.width=innerWidth;c.height=innerHeight}
+  resize();addEventListener('resize',resize);
+  function buildBolt(x1,y1,x2,y2,rough,depth){
+    if(depth<=0)return[[x1,y1],[x2,y2]];
+    const mx=(x1+x2)/2+(Math.random()-.5)*rough;
+    const my=(y1+y2)/2+(Math.random()-.5)*rough*.4;
+    return[...buildBolt(x1,y1,mx,my,rough*.55,depth-1),...buildBolt(mx,my,x2,y2,rough*.55,depth-1)];
+  }
+  function drawBolt(pts,alpha,w,glow){
+    ctx.save();ctx.shadowColor='rgba(220,30,10,.9)';ctx.shadowBlur=glow;
+    ctx.strokeStyle=`rgba(255,60,20,${alpha*.25})`;ctx.lineWidth=w*4;ctx.lineCap='round';ctx.lineJoin='round';
+    ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);
+    for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i][0],pts[i][1]);ctx.stroke();ctx.restore();
+    ctx.save();ctx.shadowColor='rgba(255,40,10,1)';ctx.shadowBlur=glow*.5;
+    ctx.strokeStyle=`rgba(255,80,30,${alpha*.6})`;ctx.lineWidth=w*1.8;ctx.lineCap='round';ctx.lineJoin='round';
+    ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);
+    for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i][0],pts[i][1]);ctx.stroke();ctx.restore();
+    ctx.save();ctx.strokeStyle=`rgba(255,200,180,${alpha*.95})`;ctx.lineWidth=w*.5;ctx.lineCap='round';ctx.lineJoin='round';
+    ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);
+    for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i][0],pts[i][1]);ctx.stroke();ctx.restore();
+  }
+  function drawBranches(pts,alpha,depth){
+    if(depth<=0)return;
+    for(let b=0;b<Math.floor(Math.random()*3)+1;b++){
+      const si=Math.floor(Math.random()*pts.length*.4+pts.length*.1);
+      const[sx,sy]=pts[Math.min(si,pts.length-1)];
+      const angle=Math.random()*Math.PI*.8-Math.PI*.4;
+      const len=Math.random()*c.height*.22+c.height*.06;
+      const bp=buildBolt(sx,sy,sx+Math.sin(angle)*len*.7,sy+Math.cos(angle)*len,len*.35,4);
+      drawBolt(bp,alpha*.45,.9,18);
+      if(depth>1)drawBranches(bp,alpha*.35,depth-1);
+    }
+  }
+  let strikes=[],fc=0,next=60+Math.random()*90;
+  function bloom(intensity){
+    const r=Math.floor(140*intensity),g=Math.floor(10*intensity),b2=Math.floor(5*intensity);
+    bl.style.background=`rgba(${r},${g},${b2},${.12*intensity})`;
+    setTimeout(()=>{bl.style.background='transparent'},60);
+    if(Math.random()>.4)setTimeout(()=>{bl.style.background=`rgba(${r},${g},${b2},${.07*intensity})`;setTimeout(()=>{bl.style.background='transparent'},40)},90);
+  }
+  function spawn(){
+    const e=Math.random();let x1,y1,x2,y2,rough;
+    if(e<.5){x1=Math.random()*c.width;y1=0;x2=x1+(Math.random()-.5)*c.width*.4;y2=c.height*(.4+Math.random()*.55);rough=c.height*.28}
+    else if(e<.75){x1=0;y1=Math.random()*c.height*.7;x2=c.width*(.3+Math.random()*.5);y2=y1+(Math.random()-.5)*c.height*.3;rough=c.width*.2}
+    else{x1=c.width;y1=Math.random()*c.height*.7;x2=c.width*(.1+Math.random()*.5);y2=y1+(Math.random()-.5)*c.height*.3;rough=c.width*.2}
+    strikes.push({pts:buildBolt(x1,y1,x2,y2,rough,7),frame:0,total:6+Math.floor(Math.random()*8)});
+  }
+  function loop(){
+    ctx.clearRect(0,0,c.width,c.height);fc++;
+    if(fc>=next){
+      const n=Math.random()<.3?2:1;for(let i=0;i<n;i++)spawn();
+      bloom(.4+Math.random()*.6);next=fc+150+Math.random()*400;
+    }
+    strikes=strikes.filter(s=>s.frame<s.total);
+    strikes.forEach(s=>{
+      const p=s.frame/s.total;
+      let a=p<.2?p/.2:p<.6?1:1-(p-.6)/.4;a=Math.max(0,Math.min(1,a));
+      const fl=Math.random()>.25?1:.3;
+      drawBolt(s.pts,a*fl,1.6,40);
+      if(s.frame===0)drawBranches(s.pts,a,2);
+      s.frame++;
+    });
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+/* ── PHOTO 3D TILT ── */
+const pf=document.getElementById('photoFrame');
+if(pf){
+  document.addEventListener('mousemove',e=>{
+    const r=pf.getBoundingClientRect();
+    const dx=(e.clientX-(r.left+r.width/2))/innerWidth;
+    const dy=(e.clientY-(r.top+r.height/2))/innerHeight;
+    pf.style.transform=`perspective(700px) rotateX(${dy*-14}deg) rotateY(${dx*14}deg)`;
+  });
+}
+
+/* ── PROJECT CARD 3D TILT ── */
+document.querySelectorAll('.pcard').forEach(c=>{
+  c.addEventListener('mousemove',e=>{
+    const r=c.getBoundingClientRect();
+    const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+    c.style.transform=`perspective(600px) rotateY(${x*10}deg) rotateX(${-y*10}deg) scale(1.02)`;
+  });
+  c.addEventListener('mouseleave',()=>{c.style.transform='perspective(600px) rotateY(0) rotateX(0) scale(1)'});
+});
+
+/* ── PDF TILT ── */
+const pm=document.querySelector('.pdf-mock');
+if(pm){
+  pm.addEventListener('mousemove',e=>{
+    const r=pm.getBoundingClientRect();
+    const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+    pm.style.transform=`perspective(900px) rotateY(${x*12}deg) rotateX(${-y*12}deg) translateY(-8px)`;
+  });
+  pm.addEventListener('mouseleave',()=>{pm.style.transform=''});
+}
+
+/* ── TAB FILTER ── */
+function fTab(cat){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===cat));
+  document.querySelectorAll('.pcard').forEach(c=>{
+    const show=cat==='all'||c.dataset.c===cat;
+    c.style.display=show?'':'none';
+    if(show)c.style.animation='fadeUp .4s ease forwards';
+    if(c.dataset.c==='poster')c.style.aspectRatio=cat==='poster'?'3/4':'4/3';
+  });
+}
+
+/* ── NAV ACTIVE ON SCROLL ── */
+const sections=['hero','about','projects','pdf-strip','contact'];
+const navAs=document.querySelectorAll('.nav-links a');
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(en=>{
+    if(en.isIntersecting){
+      const id=en.target.id;
+      navAs.forEach(a=>a.style.color='');
+      const match=[...navAs].find(a=>a.getAttribute('onclick')?.includes(id));
+      if(match)match.style.color='var(--ink)';
+    }
+  });
+},{threshold:.3});
+sections.forEach(id=>{const el=document.getElementById(id);if(el)obs.observe(el)});
+
+/* ── TOAST ── */
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200)}
+
+/* ── PDF DOWNLOAD ── */
+function dlPDF(){
+  const a=document.createElement('a');a.href='Abhijeet-Portfolio.pdf';a.download='Abhijeet-Portfolio-2026.pdf';a.click();
+  showToast('◆ Portfolio downloading...');
+}
+
+/* ── SEND MESSAGE ── */
+async function sendMsg(){
+  const n=document.getElementById('fN').value;
+  const e=document.getElementById('fE').value;
+  const t=document.getElementById('fT').value;
+  const m=document.getElementById('fM').value;
+  if(!n||!e||!m){showToast('Please fill all fields');return}
+
+  const res = await fetch('https://formspree.io/f/mgodebpq', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({name:n, email:e, projectType:t, message:m})
+  });
+
+  if(res.ok){
+    showToast('◆ Message sent! Will reply soon.');
+    ['fN','fE','fT','fM'].forEach(id=>document.getElementById(id).value='');
+  } else {
+    showToast('Something went wrong. Email me directly.');
+  }
+}
+</script>
+</body>
+</html>
